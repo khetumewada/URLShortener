@@ -1,0 +1,108 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'image/img_1.png' %}"/>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/htmx/2.0.6/htmx.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
+    <title>
+        {% block title %}
+            URL Shortener
+        {% endblock title %}
+    </title>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+<nav class="fixed top-0 left-0 w-full bg-white shadow-md z-50">
+    <div class="container mx-auto px-4 flex items-center justify-between h-16">
+
+        <a href="/" class="flex items-center space-x-2">
+            <img src="{% static 'image/img.png' %}" alt="Profile Image" class="w-12 h-12 rounded-full">
+            <span class="font-bold text-lg text-grey-800">URL Shortener</span>
+        </a>
+
+        <!-- Mobile toggle -->
+        <button id="menu-toggle" class="lg:hidden text-gray-600 focus:outline-none">
+            <i class="fa-solid fa-bars text-2xl"></i>
+        </button>
+
+        <!-- Navbar -->
+        <div class="hidden lg:flex lg:items-center lg:space-x-6">
+            {% if not request.user.is_authenticated %}
+                <a href="/about" class="text-gray-700 hover:text-green-600 transition">About</a>
+                <a href="/contact" class="text-gray-700 hover:text-green-600 transition">Contact</a>
+                <a href="/register" class="text-gray-700 hover:text-green-600 transition">Sign Up</a>
+                <a href="/login" class="text-gray-700 hover:text-green-600 transition">Sign In</a>
+            {% else %}
+                <div class="flex gap-6 text-gray-700">
+                    <a class="hover:text-blue-800">
+                        Username: <span class="font-semibold">{{ user.username }}</span>
+                    </a>
+                    <a class="hover:text-blue-800">
+                        Email: <span class="font-semibold">{{ user.email }}</span>
+                    </a>
+                </div>
+
+                <a href="/profile" class="text-gray-700 hover:text-green-600 transition">Profile</a>
+                <a href="/about" class="text-gray-700 hover:text-green-600 transition">About</a>
+                <a href="/contact" class="text-gray-700 hover:text-green-600 transition">Contact</a>
+                <a href="/logout"
+                   class="border border-red-500 text-red-500 px-4 py-2 rounded-full hover:bg-red-500 hover:text-white transition">Log
+                    Out</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu"
+         class="hidden flex-col space-y-2 px-4 pb-4 bg-white lg:hidden transition-all duration-300 ease-in-out">
+        {% if not request.user.is_authenticated %}
+            <a href="{% url 'accounts:about' %}" class="block text-gray-700 hover:text-green-600 transition">About</a>
+            <a href="{% url 'accounts:contact' %}"
+               class="block text-gray-700 hover:text-green-600 transition">Contact</a>
+            <a href="{% url 'accounts:register' %}" class="block text-gray-700 hover:text-green-600 transition">Sign
+                Up</a>
+            <a href="{% url 'accounts:login' %}" class="block text-gray-700 hover:text-green-600 transition">Sign In</a>
+        {% else %}
+            <a href="{% url 'shortener:profile' %}"
+               class="block text-gray-700 hover:text-green-600 transition">Profile</a>
+            <a href="{% url 'accounts:about' %}" class="block text-gray-700 hover:text-green-600 transition">About</a>
+            <a href="{% url 'accounts:contact' %}"
+               class="block text-gray-700 hover:text-green-600 transition">Contact</a>
+            <a href="{% url 'accounts:logout' %}"
+               class="block border border-red-500 text-red-500 px-4 py-2 rounded-full hover:bg-red-500 hover:text-white transition">Log
+                Out</a>
+        {% endif %}
+    </div>
+</nav>
+
+<!-- Add padding for fixed navbar -->
+<main class="flex-1 pt-20 flex items-center justify-center">
+    {% block content %}{% endblock content %}
+</main>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const menuToggle = document.getElementById("menu-toggle");
+        const mobileMenu = document.getElementById("mobile-menu");
+
+        menuToggle.addEventListener("click", () => {
+            mobileMenu.classList.toggle("hidden");
+        });
+    });
+    document.body.addEventListener('htmx:configRequest', (event) => {
+        const token = document.querySelector('meta[name="csrf-token"]').content;
+        if (token) {
+            event.detail.headers['X-CSRFToken'] = token;
+        }
+    });
+</script>
+{% block js %}
+{% endblock %}
+</body>
+</html>

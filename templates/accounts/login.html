@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load socialaccount %}
+
+{% block title %}
+    {{ page_title }} {{ block.super }}
+{% endblock %}
+
+{% block content %}
+    <div class="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
+        <div class="flex flex-col items-center justify-center mb-6 space-y-2">
+            <h1 class="text-2xl font-bold text-gray-800">Sign In</h1>
+        </div>
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="mb-4">
+                    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ field.label }}
+                    </label>
+                    <div class="flex items-center border rounded-lg px-3 py-2 bg-gray-50">
+                        {% if "username" in field.name %}
+                            <i class="fas fa-user text-gray-400 mr-2"></i>
+                        {% else %}
+                            <i class="fas fa-lock text-gray-400 mr-2"></i>
+                        {% endif %}
+                        {{ field }}
+                    </div>
+                    {% if field.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ field.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <button type="submit"
+                    class="w-full bg-gray-800 hover:bg-gray-900 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">
+                <i class="fas fa-sign-in-alt mr-2"></i> Login
+            </button>
+        </form>
+
+        <p class="mt-6 text-sm text-center text-gray-600">
+            Don’t have an account?
+            <a href="{% url 'accounts:register' %}" class="text-blue-600 hover:underline">Register</a>
+        </p>
+        <br>
+        <a href="{% provider_login_url 'google' %}">
+            <button class="flex items-center justify-center gap-2 w-full max-w-sm py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-700 font-medium hover:bg-gray-100 transition">
+                <img src="https://www.svgrepo.com/show/355037/google.svg" alt="Google Logo" class="w-5 h-5">
+                <span>Continue with Google</span>
+            </button>
+        </a>
+    </div>
+{% endblock %}

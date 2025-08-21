@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {{ page_title }} {{ block.super }}
+{% endblock title %}
+
+{% block content %}
+    <div class="max-w-5xl mx-auto mt-10 px-4 relative" id="table-container">
+        <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">📂 Your Shortened URLs</h2>
+
+        <div class="flex justify-center mb-8">
+            <a href="{% url 'accounts:home' %}"
+               class="group relative inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold text-base rounded-2xl shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                <span class="absolute w-full h-full bg-white opacity-10 rounded-2xl top-0 left-0 pointer-events-none blur-xl transition-all duration-500 group-hover:opacity-20"></span>
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     class="h-5 w-5 mr-2 transition-transform duration-300 group-hover:rotate-12"
+                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M5 13l4 4L19 7"></path>
+                </svg>
+                Generate New URL
+            </a>
+        </div>
+
+        {% if links %}
+            <div class="overflow-x-auto shadow-md rounded-2xl mb-10 pb-6">
+                <table id="short-url-table" class="min-w-full text-sm text-left text-gray-700">
+                    <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
+                    <tr>
+                        <th class="px-6 py-3">#</th>
+                        <th class="px-6 py-3">Original</th>
+                        <th class="px-6 py-3">Short URL</th>
+                        <th class="px-6 py-3">Copy</th>
+                        <th class="px-6 py-3 text-center">Hits</th>
+                        <th class="px-6 py-3 text-center">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for i in links %}
+                        {% url 'shortener:redirector' i.shortened as short_path %}
+                        {% with full_short=request.scheme|add:"://"|add:request.get_host|add:short_path %}
+                            <tr id="row-{{ i.shortened }}" class="border-b hover:bg-gray-50">
+                                <td class="px-6 py-3 font-medium row-number">{{ forloop.counter }}</td>
+
+                                <td class="px-6 py-3">
+                                    <a href="{{ i.link }}" target="_blank" class="text-blue-600 hover:underline">
+                                        {{ i.link|truncatechars:60 }}
+                                    </a>
+                                </td>
+
+                                <td class="px-6 py-3">
+                                    <a href="{{ short_path }}" target="_blank"
+                                       class="text-indigo-600 hover:underline truncate block">
+                                        {{ full_short }}
+                                    </a>
+                                </td>
+
+                                <td class="px-6 py-3 text-center">
+                                    <button
+                                            type="button"
+                                            onclick="copyToClipboard('{{ full_short }}', this)"
+                                            class="text-xs bg-gray-800 text-white px-2 py-1 rounded-lg hover:bg-gray-900 transition min-w-[60px] text-center">
+                                        Copy
+                                    </button>
+                                </td>
+
+                                <td id="hits-{{ i.shortened }}" class="px-6 py-3 text-center"
+                                    hx-get="{% url 'shortener:hit_count' i.shortened %}"
+                                    hx-trigger="every 2s"
+                                    hx-swap="innerHTML">
+                                    {{ i.hits }}
+                                </td>
+
+                                <td class="px-6 py-3 text-center relative w-[120px]">
+                                    <button
+                                            hx-get="{% url 'shortener:delete_confirm' i.shortened %}"
+                                            hx-target="#inline-confirm"
+                                            hx-swap="innerHTML"
+                                            class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg shadow transform transition-all duration-200 hover:scale-105 hover:shadow-xl">
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endwith %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Global delete confirmation container -->
+            <div id="inline-confirm"
+                 class="fixed inset-0 flex items-center justify-center z-50 hidden"></div>
+        {% else %}
+            <p class="text-center text-gray-500 mt-6">No shortened URLs yet.</p>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script>
+        function copyToClipboard(text, btn) {
+            navigator.clipboard.writeText(text).then(() => {
+                let original = btn.innerText;
+                btn.innerText = "Copied!";
+                setTimeout(() => btn.innerText = original, 1500);
+            });
+        }
+
+        // When HTMX loads the confirmation box, unhide it
+        document.body.addEventListener("htmx:afterSwap", function (evt) {
+            if (evt.target.id === "inline-confirm") {
+                document.getElementById("inline-confirm").classList.remove("hidden");
+            }
+        });
+
+        document.body.addEventListener("htmx:afterRequest", function (evt) {
+            // Only run if the request was a DELETE
+            if (evt.detail.xhr.status === 204 || evt.detail.xhr.status === 200) {
+                document.querySelectorAll('#short-url-table tbody tr').forEach((tr, index) => {
+                    let cell = tr.querySelector('.row-number');
+                    if (cell) {
+                        cell.textContent = index + 1;
+                    }
+                });
+            }
+        });
+
+    </script>
+{% endblock %}

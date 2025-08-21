@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+    {{ page_title }} {{ block.super }}
+{% endblock title %}
+{% block content %}
+    <div class="flex w-full max-w-xl items-center justify-center min-h-screen bg-gray-50 px-4">
+        <div class="w-full max-w-2xl bg-white shadow-lg rounded-2xl p-8">
+            <h2 class="flex items-center justify-center gap-2 text-2xl font-bold text-gray-800 mb-6">
+                <img src="{% static 'image/img.png' %}" alt="Profile Icon" class="w-8 h-8">
+                <span>URL Shortener</span>
+            </h2>
+
+            {% if user.is_authenticated %}
+                <div class="flex justify-center mb-8">
+                    <a href="{% url 'shortener:profile' %}"
+                       class="group relative inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold text-base rounded-2xl shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                        <!-- Glow effect -->
+                        <span class="absolute w-full h-full bg-white opacity-10 rounded-2xl top-0 left-0 pointer-events-none blur-xl transition-all duration-500 group-hover:opacity-20"></span>
+                        <!-- Icon + Text -->
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             class="h-5 w-5 mr-2 transition-transform duration-300 group-hover:rotate-12" fill="none"
+                             viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Go to Profile
+                    </a>
+                </div>
+            {% endif %}
+
+            <form  id="shorten-form" hx-post="." hx-target="#short-result" hx-swap="innerHTML" class="space-y-5">
+                {% csrf_token %}
+
+                <!-- Original Link -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        Enter your URL
+                    </label>
+                    {{ form.link }}
+                </div>
+
+                <!-- Custom URL (only for logged-in users) -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        Custom Short URL <span class="text-gray-400 text-xs">(optional, login required)</span>
+                    </label>
+                    {{ form.custom_url }}
+                </div>
+
+                <div class="flex justify-center">
+                    <button type="submit"
+                            class="w-full bg-gray-800 hover:bg-gray-900 text-white font-semibold py-2.5 px-4 rounded-xl shadow transition">
+                        Shorten URL
+                    </button>
+                </div>
+            </form>
+
+            <!-- Short Result -->
+            <div id="short-result" class="mt-6 text-center"></div>
+        </div>
+    </div>
+{% endblock %}
+{% block js %}
+
+{% endblock %}
+
