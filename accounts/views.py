@@ -92,6 +92,11 @@ class RegistrationView(PageTitleMixins, CreateView):
     page_title = "Registration"
     success_url = reverse_lazy("accounts:login")  # redirect after successful registration
 
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect("shortener:profile")
+        return super().dispatch(request, *args, **kwargs)
+
     def form_valid(self, form):
         user = form.save()
         backend = "accounts.backends.EmailOrUsernameBackend"
@@ -104,6 +109,11 @@ class LoginView(PageTitleMixins, FormView, TemplateView):
     success_url = "/profile"
     template_name = "accounts/login.html"
     page_title = "Login"
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect(self.success_url)
+        return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         username = form.cleaned_data['username']
