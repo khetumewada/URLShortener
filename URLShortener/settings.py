@@ -36,9 +36,10 @@ INTERNAL_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
 )
 THIRD_PARTY_APPS = (
-    'django.contrib.sites',
+
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -90,7 +91,7 @@ WSGI_APPLICATION = 'URLShortener.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=config('DATABASE_URL')  # your Supabase URL in .env
+        default=config('DATABASE_URL')  # Supabase URL in .env
     )
 # 'default': {
 #     'ENGINE': 'django.db.backends.postgresql',
@@ -123,8 +124,6 @@ AUTH_PASSWORD_VALIDATORS = [
 AUTH_USER_MODEL = "accounts.User"
 
 AUTHENTICATION_BACKENDS = [
-    "accounts.backends.EmailOrUsernameBackend",
-    "django.contrib.auth.backends.ModelBackend",  # default (admin/login)
     "allauth.account.auth_backends.AuthenticationBackend",  # allauth
 ]
 
@@ -145,7 +144,7 @@ SOCIALACCOUNT_PROVIDERS = {
             "key": "",
         },
         "SCOPE": ["profile", "email"],  # email verified mile
-        "AUTH_PARAMS": {"access_type": "offline", "prompt": "consent"},  # refresh token ke liye
+        "AUTH_PARAMS": {"access_type": "offline", "prompt": "consent"},
     }
 }
 SOCIALACCOUNT_LOGIN_ON_GET = True

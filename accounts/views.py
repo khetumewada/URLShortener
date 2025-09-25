@@ -99,8 +99,7 @@ class RegistrationView(PageTitleMixins, CreateView):
 
     def form_valid(self, form):
         user = form.save()
-        backend = "accounts.backends.EmailOrUsernameBackend"
-        login(self.request, user, backend=backend)  # auto-login user after registration
+        login(self.request, user)  # auto-login user after registration
         return super().form_valid(form)
 
 
@@ -122,7 +121,7 @@ class LoginView(PageTitleMixins, FormView, TemplateView):
 
         if user is not None and user.is_active:
             login(self.request, user)
-            return super(LoginView, self).form_valid(form)
+            return redirect(self.success_url)
         else:
             return self.form_invalid(form)
 

@@ -107,7 +107,6 @@
             });
         }
 
-        // When HTMX loads the confirmation box, unhide it
         document.body.addEventListener("htmx:afterSwap", function (evt) {
             if (evt.target.id === "inline-confirm") {
                 document.getElementById("inline-confirm").classList.remove("hidden");
@@ -115,7 +114,6 @@
         });
 
         document.body.addEventListener("htmx:afterRequest", function (evt) {
-            // Only run if the request was a DELETE
             if (evt.detail.xhr.status === 204 || evt.detail.xhr.status === 200) {
                 document.querySelectorAll('#short-url-table tbody tr').forEach((tr, index) => {
                     let cell = tr.querySelector('.row-number');

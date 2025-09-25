@@ -22,7 +22,6 @@ class URLDeleteView(LoginRequiredMixin, DeleteView):
     slug_url_kwarg = "shortened"
 
     def dispatch(self, request, *args, **kwargs):
-        # allow DELETE method via HTMX
         if request.method.lower() == "delete":
             return self.delete(request, *args, **kwargs)
         return super().dispatch(request, *args, **kwargs)
